@@ -224,3 +224,15 @@ Future<void> startMonitoringAbnormalItemCount() async {
 void stopMonitoringAbnormalItemCount() {
   abnormalItemCountController.close();
 }
+
+Future<void> deleteAbnormalItem(String abnormalKey) async {
+  final conn = await connectionPool.getConnection();
+  try {
+    await conn.query(
+      'DELETE FROM `Abnormal_Detection` WHERE `abnormalKey` = ?;',
+      [abnormalKey],
+    );
+  } finally {
+    connectionPool.releaseConnection(conn);
+  }
+}

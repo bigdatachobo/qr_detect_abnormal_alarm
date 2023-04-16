@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final fontSize = screenWidth * 0.8 / 3;
+    final fontSize = screenWidth * 0.34 / 3;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,10 +51,17 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      color: Colors.lightBlue,
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 0.05
+                        )
+                      ),
                       child: Text(
                         '입고',
-                        style: TextStyle(
+                          style: TextStyle(
+                          color: Colors.white,
                           fontSize: fontSize,
                           fontWeight: FontWeight.bold,
                         ),
@@ -77,10 +84,17 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      color: Colors.lightGreen,
+                      decoration: BoxDecoration(
+                          color: Colors.black87,
+                          border: Border.all(
+                              color: Colors.white,
+                              width: 0.05
+                          )
+                      ),
                       child: Text(
                         '출고',
                         style: TextStyle(
+                          color: Colors.white,
                           fontSize: fontSize,
                           fontWeight: FontWeight.bold,
                         ),
@@ -109,10 +123,17 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      color: Colors.yellowAccent[100],
+                      decoration: BoxDecoration(
+                          color: Colors.black87,
+                          border: Border.all(
+                              color: Colors.white,
+                              width: 0.05
+                          )
+                      ),
                       child: Text(
                         '이동',
                         style: TextStyle(
+                          color: Colors.white,
                           fontSize: fontSize,
                           fontWeight: FontWeight.bold,
                         ),
@@ -137,15 +158,16 @@ class _HomePageState extends State<HomePage> {
                         bool isAlert = count > 0;
                         return Container(
                           alignment: Alignment.center,
-                          color: isAlert ? Colors.redAccent[200] : Colors.grey,
+                          color: isAlert ? Colors.redAccent[200] : Colors.black87,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(top: 30.0),
+                                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 30 ),
                                 child: Text(
-                                    '위치\n오류',
+                                    '재고\n오류',
                                     style: TextStyle(
+                                      color: Colors.white,
                                       fontSize: fontSize,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -155,12 +177,12 @@ class _HomePageState extends State<HomePage> {
                               // if (isAlert)
                                 Positioned(
                                   top: 0,
-                                  right: 5,
+                                  right: 0,
                                   child: Container(
-                                    padding: EdgeInsets.all(0),
+                                    padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: Colors.yellow,
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
                                     constraints: BoxConstraints(
                                       minWidth: 30,
@@ -169,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Text(
                                       '$count',
                                       style: TextStyle(
-                                        fontSize: 30,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       textAlign: TextAlign.center,

@@ -27,10 +27,10 @@ class _AbnormalItemsPageState extends State<AbnormalItemsPage> {
       int index = entry.key;
       AbnormalItem item = entry.value;
       return Container(
-          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 6,
@@ -42,29 +42,29 @@ class _AbnormalItemsPageState extends State<AbnormalItemsPage> {
           child: ListTile(
             title: Text(
               '관리번호: ${item.managementNumber}',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text: '전산재고위치: ',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.green),
                   ),
                   TextSpan(
                     text: '${item.dbLocation} / ',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.green),
                   ),
-                  TextSpan(
-                    text: '실재재고위치: ',
+                  const TextSpan(
+                    text: '실물재고위치: ',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.red),
                   ),
                   TextSpan(
                     text: '${item.actualLocation}',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.red),
                   ),
                 ],
@@ -75,7 +75,7 @@ class _AbnormalItemsPageState extends State<AbnormalItemsPage> {
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: const Text('실재재고 위치를 수정하시겠습니까?'),
+                        title: const Text('현재 재고 위치를 수정하시겠습니까?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
@@ -102,7 +102,10 @@ class _AbnormalItemsPageState extends State<AbnormalItemsPage> {
                         title: const Text('수정이 완료되었습니다.'),
                         actions: [
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () async {
+                              await deleteAbnormalItem(updatedItem.abnormalKey);
+                              Navigator.pop(context);
+                            },
                             child: const Text('OK'),
                           ),
                         ],
@@ -114,7 +117,7 @@ class _AbnormalItemsPageState extends State<AbnormalItemsPage> {
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: Text('화물을 ${item.dbLocation} 위치로 옮겨주세요.'),
+                        title: Text('재고를 ${item.dbLocation} 위치로 옮겨주세요.'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
