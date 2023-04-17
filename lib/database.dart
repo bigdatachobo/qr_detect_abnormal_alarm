@@ -236,3 +236,22 @@ Future<void> deleteAbnormalItem(String abnormalKey) async {
     connectionPool.releaseConnection(conn);
   }
 }
+
+// 입고시 db 조회하여 동일한 관리번호가 있는지 조회하는 함수
+Future<bool> checkForDuplicate(String code) async {
+  final conn = await connectionPool.getConnection(); // 커넥션을 가져옵니다.
+  bool isDuplicate = false;
+
+  try {
+    var result = await conn.query(
+      'SELECT * FROM `VMStset`.`UW1_재고_Eng` WHERE `관리번호` = ?',
+      [code],
+    );
+
+    isDuplicate = result.isNotEmpty;
+  } finally {
+    connectionPool.releaseConnection(conn); // 작업이 완료되면 커넥션을 반환합니다.
+  }
+
+  return isDuplicate;
+}

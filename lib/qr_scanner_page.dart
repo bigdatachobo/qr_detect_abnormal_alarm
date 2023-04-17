@@ -27,12 +27,17 @@ class _QRScannerPageState extends State<QRScannerPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Timer? _timer;
   bool _isQRCodeDetected = false;
+  // 다른 필드 및 메서드 유지
+  StreamSubscription<Barcode>? _barcodeSubscription;
 
   final RegExp pattern = RegExp(r'^[A-Z]\d{5}_\d{10}$');
 
+
   @override
   void dispose() {
+    _barcodeSubscription?.cancel();
     _controller?.dispose();
+    _controller = null;
     _timer?.cancel();
     super.dispose();
   }
@@ -41,7 +46,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
     setState(() {
       _controller = controller;
     });
-    controller.scannedDataStream.listen((scanData) {
+    _barcodeSubscription = controller.scannedDataStream.listen((scanData) {
       // QR 코드가 스캔 되고 이전에 표시된 경고 대화 상자가 없는 경우
       if (!_isQRCodeDetected && scanData.code != null) {
         // QR 코드가 정규식 패턴과 일치 하는 경우
@@ -119,33 +124,89 @@ class _QRScannerPageState extends State<QRScannerPage> {
   }
 
   Future<void> processQRCode(BuildContext context, String code, bool isInbound) async {
-    if (isInbound) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EmptySpacePage(),
+    // DB 조회 함수를 호출하며 "관리번호" 컬럼에 같은 데이터가 있는지 확인
+    bool isDuplicate = await checkForDuplicate(code);
+
+    if(isDuplicate){
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('동일한 관리번호가 이미 입고 되었습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Navigator.of(context).pushAndRemoveUntil(
+                //   MaterialPageRoute(
+                //     builder: (context) => HomePage(),
+                //   ),
+                //       (route) => false,
+                // );
+                Navigator.of(context).pop(); // 현재 다이얼로그를 닫습니다.
+                Navigator.of(context).pop(); // QRScannerPage를 닫습니다.
+              },
+              child: const Text('OK'),
+            ),
+          ],
         ),
-      ).then((selectedLocationKey) async {
-        await addOrUpdateItem(code, selectedLocationKey);
+      );
+    } else {
+      if (isInbound) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmptySpacePage(),
+          ),
+        ).then((selectedLocationKey) async {
+          if (selectedLocationKey != null) { // null 체크 추가
+          await addOrUpdateItem(code, selectedLocationKey);
+          await showDialog(
+            context: context,
+            builder: (context) =>
+                AlertDialog(
+                  title: const Text('Success'),
+                  content: const Text('입고 완료'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(),
+                          ),
+                              (route) => false,
+                        );
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+          );
+          // ignore: use_build_context_synchronously
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(),
+            ),
+                (route) => false,
+          );
+        }});
+      } else {
+        // Set item as "출하" in the database
+        await setItemAsOutbound(code);
+        // ignore: use_build_context_synchronously
         await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Success'),
-            content: const Text('입고 완료'),
-            actions: [
-              TextButton(
-                onPressed: (){
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(),
-                    ),
-                        (route) => false,
-                  );
-                },
-                child: const Text('OK'),
+          builder: (context) =>
+              AlertDialog(
+                title: const Text('Success'),
+                content: const Text('출고 완료'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
         // ignore: use_build_context_synchronously
         Navigator.pushAndRemoveUntil(
@@ -155,37 +216,11 @@ class _QRScannerPageState extends State<QRScannerPage> {
           ),
               (route) => false,
         );
-
+      }
+      setState(() {
+        _isQRCodeDetected = false;
       });
-    } else {
-      // Set item as "출하" in the database
-      await setItemAsOutbound(code);
-      // ignore: use_build_context_synchronously
-      await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('출고 완료'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(),
-        ),
-            (route) => false,
-      );
     }
-    setState(() {
-      _isQRCodeDetected = false;
-    });
   }
 
   @override
