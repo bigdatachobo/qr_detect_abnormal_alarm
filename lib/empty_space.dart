@@ -8,8 +8,7 @@ class EmptySpacePage extends StatefulWidget {
 
 class _EmptySpacePageState extends State<EmptySpacePage> {
   late Future<List<String>> _emptySpaces;
-  final Color _color1 = Colors.lightBlue;
-  final Color _color2 = Colors.lightGreen;
+  final Color _borderColor = Colors.indigo;
 
   @override
   void initState() {
@@ -25,20 +24,9 @@ class _EmptySpacePageState extends State<EmptySpacePage> {
 
   List<Widget> buildLocationList(List<String> emptySpaces) {
     List<Widget> locationList = [];
-    Color lastColor = _color1;
 
     for (int i = 0; i < emptySpaces.length; i++) {
       final locationKey = emptySpaces[i];
-      final prevLocationKey = i > 0 ? emptySpaces[i - 1] : null;
-
-      if (prevLocationKey != null) {
-        final prevRack = prevLocationKey.split('_')[1];
-        final currentRack = locationKey.split('_')[1];
-
-        if (prevRack != currentRack) {
-          lastColor = (lastColor == _color1) ? _color2 : _color1;
-        }
-      }
 
       locationList.add(
         InkWell(
@@ -50,11 +38,16 @@ class _EmptySpacePageState extends State<EmptySpacePage> {
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12.0),
-              color: lastColor,
+              border: Border.all(
+                  color: _borderColor,
+                  width: 0.3
+              ),
             ),
-            child: Text(
-              locationKey,
-              style: TextStyle(fontSize: 20, color: (lastColor == _color2) ? Colors.black : Colors.white),
+            child: Center(
+              child: Text(
+                locationKey,
+                style: const TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ),
@@ -70,27 +63,30 @@ class _EmptySpacePageState extends State<EmptySpacePage> {
       appBar: AppBar(
         title: const Text('Empty Spaces'),
       ),
-      body: FutureBuilder<List<String>>(
-        future: _emptySpaces,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+      body: Container(
+        color: Colors.black87,
+        child: FutureBuilder<List<String>>(
+          future: _emptySpaces,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              final emptySpaces = snapshot.data!;
+              final locationList = buildLocationList(emptySpaces);
+
+              return RefreshIndicator(
+                onRefresh: _refresh,
+                child: ListView(
+                  children: locationList,
+                ),
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
             }
-
-            final emptySpaces = snapshot.data!;
-            final locationList = buildLocationList(emptySpaces);
-
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView(
-                children: locationList,
-              ),
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+          },
+        ),
       ),
     );
   }

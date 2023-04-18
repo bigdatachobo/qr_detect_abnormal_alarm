@@ -127,7 +127,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.black87,
                           border: Border.all(
                               color: Colors.white,
-                              width: 0.05
+                              width: 0.1
                           )
                       ),
                       child: Text(
@@ -155,10 +155,10 @@ class _HomePageState extends State<HomePage> {
                       stream: abnormalItemCountController.stream,
                       builder: (context, snapshot) {
                         int count = snapshot.data ?? 0;
-                        bool isAlert = count > 0;
+                        // bool isAlert = count > 0;
                         return Container(
                           alignment: Alignment.center,
-                          color: isAlert ? Colors.redAccent[200] : Colors.black87,
+                          color: Colors.black87,//isAlert ? Colors.redAccent[200] :
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                                   top: 0,
                                   right: 0,
                                   child: Container(
-                                    padding: EdgeInsets.all(2),
+                                    padding: EdgeInsets.all(0),
                                     decoration: BoxDecoration(
                                       color: Colors.yellow,
                                       borderRadius: BorderRadius.circular(20),
