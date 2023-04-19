@@ -39,7 +39,7 @@ void processMove(BuildContext context, String code, bool isQRCodeDetected) async
   }
 }
 
-void processQRCode(BuildContext context, String code, bool isInbound) async {
+Future<void> processQRCode(BuildContext context, String code, bool isInbound) async {
   if (isInbound) {
     Navigator.push(
       context,
