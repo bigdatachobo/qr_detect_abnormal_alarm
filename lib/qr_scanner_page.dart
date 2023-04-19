@@ -19,7 +19,6 @@ class QRScannerPage extends StatefulWidget {
 class _QRScannerPageState extends State<QRScannerPage> {
   QRViewController? _controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  bool _isQRCodeDetected = false;
 
   final RegExp pattern = RegExp(r'^[A-Z]\d{5}_\d{10}$');
 
@@ -30,22 +29,17 @@ class _QRScannerPageState extends State<QRScannerPage> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      _controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
-      if (!_isQRCodeDetected && scanData.code != null) {
+    _controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      if (scanData.code != null && _controller != null) {
         if (pattern.hasMatch(scanData.code!)) {
-          _isQRCodeDetected = true;
           _controller?.pauseCamera();
-          processQRCode(context, scanData.code!, widget.isInbound);
-          _isQRCodeDetected = false;
+          await processQRCode(context, scanData.code!, widget.isInbound);
+          _controller?.resumeCamera();
         } else {
-          if (!_isQRCodeDetected) {
-            _isQRCodeDetected = true;
-            showInvalidCodeFormatDialog(context);
-            _isQRCodeDetected = false;
-          }
+          _controller?.pauseCamera();
+          await showInvalidCodeFormatDialog(context);
+          _controller?.resumeCamera();
         }
       }
     });
@@ -69,7 +63,7 @@ class _QRScannerPageState extends State<QRScannerPage> {
               height: 200,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: _isQRCodeDetected ? Colors.green : Colors.white,
+                  color: Colors.white,
                   width: 5.0,
                 ),
               ),
